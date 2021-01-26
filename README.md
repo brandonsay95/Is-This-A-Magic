@@ -1,9 +1,9 @@
-# Fabric Example Mod
+# Is This A Magic
+What is the difference between Magic and Science, you know?
+## CreatedBy
 
-## Setup
-
-For setup instructions please see the [fabric wiki page](https://fabricmc.net/wiki/tutorial:setup) that relates to the IDE that you are using.
-
-## License
-
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+ DarkDerank",
+ TheDarkVessle,
+ TheDarkVessel,
+ ScarletBlossum,
+ IDONTHAVEANYRELATEDTOMINECRAFTSOYOUKNOWILOVECAPS
