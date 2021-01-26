@@ -26,7 +26,7 @@ private static ConfiguredFeature<?,?> ORE_IRON_NODE_OVERWORLD = Feature.ORE
     new BlockMatchRuleTest(Blocks.IRON_ORE),
     //  OreFeatureConfig.Rules.BASE_STONE_OVERWORLD,
     ITAMBlocks.IRON_ORE_NODE.getDefaultState(),
-    1//vein Size
+    20//vein Size
     ))
     .decorate(Decorator.RANGE.configure(new RangeDecoratorConfig(
     0,0,64
