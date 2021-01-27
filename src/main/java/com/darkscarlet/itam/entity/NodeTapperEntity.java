@@ -2,7 +2,9 @@ package com.darkscarlet.itam.entity;
 
 import com.darkscarlet.itam.ITAMMod;
 import com.darkscarlet.itam.block.ITAMBlocks;
+import com.darkscarlet.itam.item.ITAMItem;
 import com.darkscarlet.itam.screenhandlers.BoxScreenHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -10,6 +12,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
@@ -22,6 +25,10 @@ import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandlerFactory ,  ImplementedInventory, Tickable {
 
@@ -72,36 +79,30 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
 
     @Override
     public void tick() {
+
         if(this.world != null && !this.world.isClient ){
             if(canUse()){
             _currentTick = 0;
-                for(int x = pos.getX()-1; x <= pos.getX()+1 ;x++){
-                    for(int y = pos.getY()-1; y <= pos.getY()+1 ;y++){
-                        for(int z = pos.getZ()-1; z <= pos.getZ()+1 ;z++){
-                            if(x == pos.getX() && y == pos.getY() && z == pos.getZ())
-                                continue;
-                            BlockEntity e = world.getBlockEntity(new BlockPos(x,y,z));
-                            BlockState state = world.getBlockState(new BlockPos(x,y,z));
-                            if(state.getBlock() == ITAMBlocks.IRON_ORE_NODE){
-                                for(int i = 0 ; i < items.size();i++){
 
-                                    if(canStack && getStack(i).getItem() == Items.IRON_NUGGET && getStack(i).getCount() < getStack(i).getMaxCount())
-                                    {
-                                        getStack(i).setCount(getStack(i).getCount() + 1);
-                                        break;
+            ArrayList<ItemStack> blockCounts = calculateBLockMap(1);
+            int manaPool = getManaPool();
+            int deduct = 0;
+            if(manaPool >= blockCounts.size())
+            {
+                for(ItemStack itemStack : blockCounts){
+                    boolean canAdd = addSlot(itemStack);
+                    if(canAdd)
+                        deduct ++;
 
-                                    }
-
-                                    if(getStack(i).isEmpty()){
-                                        setStack(i, new ItemStack(Items.IRON_NUGGET,1));
-                                        break;
-
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
+                if(deduct >0){
+                    markDirty();
+                    deductManaPool(deduct);
+                }
+
+            }
+
+
             }else{
             _currentTick ++;
 
@@ -109,6 +110,81 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
             }
 
         }
+    }
+
+    private boolean addSlot(ItemStack itemStack) {
+        for(int i = 0 ; i < size();i++){
+            ItemStack cStack = getStack(i);
+            if(cStack.isEmpty())
+            {
+                setStack(i,itemStack);
+                return true;
+            }else{
+                if(cStack.getItem() == itemStack.getItem()){
+                    if(cStack.getCount() + itemStack.getCount() <= cStack.getMaxCount()){
+                        cStack.setCount(cStack.getCount() + itemStack.getCount());
+                        return true;
+                    }else{
+                        continue;
+                    }
+                }
+            }
+
+        }
+        return false;
+
+    }
+
+    private int deductManaPool(int deduct){
+        //int mxSize = 0;
+        for(int i = 0 ; i < size();i++){
+            Item itm = getStack(i).getItem();
+            if(itm == ITAMItem.Anima_Essence){
+               getStack(i).setCount(getStack(i).getCount() - deduct); // im not doing any negative protection here
+                return deduct;
+                //im so very lazy
+            }
+        }
+        // return mxSize;
+        return 0;
+    }
+    private int getManaPool() { // im so fucking lazy // were just not going to allow them to use more than one slot , unless they are good at math
+        //int mxSize = 0;
+        for(int i = 0 ; i < size();i++){
+            Item itm = getStack(i).getItem();
+            if(itm == ITAMItem.Anima_Essence){
+                return getStack(i).getCount();
+                //mxSize += getStack(i).getCount();
+            }
+        }
+       // return mxSize;
+        return 0;
+    }
+
+    private ArrayList<ItemStack> calculateBLockMap(int radius) {
+        /// possibly only needs calculated when blocks around me are changed
+        Map<Block,Integer> mp = new HashMap<Block,Integer>();
+        int xpos = pos.getX();
+        int ypos = pos.getY();
+        int zpos = pos.getZ();
+        for(int x = xpos-radius; x<= xpos+radius ; x++)
+            for(int y = ypos-radius; y<= ypos+radius ; y++)
+                for(int z = zpos-radius; z<= zpos+radius ; z++){
+                    Block block = world.getBlockState(new BlockPos(x,y,z)).getBlock();
+                    if(ITAMMod.TAPPER_ITEMS.containsKey(block)){
+                        ItemStack s = ITAMMod.TAPPER_ITEMS.get(block);
+                        int cnt = mp.containsKey(block)?mp.get(block) +1:1;
+                        mp.put(block,cnt);
+                    }
+                }
+        ArrayList<ItemStack> lst = new ArrayList<ItemStack>();
+        for(Block key: mp.keySet()){
+            ItemStack stack = ITAMMod.TAPPER_ITEMS.get(key).copy();
+            stack.setCount(stack.getCount() * mp.get(key));
+            lst.add(stack);
+        }
+        return lst;
+
     }
 
 
