@@ -18,13 +18,15 @@ public class StickOfPowerItem extends Item {
 
     @Override
     public ActionResult useOnBlock(ItemUsageContext context) {
-        int chunkX = (int) Math.floor(context.getHitPos().getX() / 16);
-        int chunkZ = (int) Math.floor(context.getHitPos().getZ() / 16);
+
         BlockState originalBlock = context.getWorld().getBlockState(context.getBlockPos());
         Block block =  originalBlock.getBlock();
-        for(int x = chunkX * 16; x < chunkX*16+16 ;x++){
+        int cSize = 64;
+        int chunkX = (int) Math.floor(context.getHitPos().getX() / cSize);
+        int chunkZ = (int) Math.floor(context.getHitPos().getZ() / cSize);
+        for(int x = chunkX * cSize; x < chunkX*cSize+cSize ;x++){
             for(int y = 0 ; y< 256;y++){
-                for(int z = chunkZ * 16; z<chunkZ *16+16;z++){
+                for(int z = chunkZ * cSize; z<chunkZ *cSize+cSize;z++){
                 if(context.getWorld().getBlockState(new BlockPos(x,y,z)).getBlock() == block)
 
                     context .getWorld().setBlockState(new BlockPos(x,y,z), Blocks.AIR.getDefaultState());

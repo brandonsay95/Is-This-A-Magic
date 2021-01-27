@@ -23,29 +23,17 @@ public class ITAMOreGen {
             .configure(
                     new OreFeatureConfig(
                             new BlockMatchRuleTest(Blocks.IRON_ORE),
-                            //  OreFeatureConfig.Rules.BASE_STONE_OVERWORLD,
+                           // OreFeatureConfig.Rules.BASE_STONE_OVERWORLD,
                             ITAMBlocks.IRON_ORE_NODE.getDefaultState(),
-                            1//vein Size
+                            10//vein Size
                     ))
             .decorate(Decorator.RANGE.configure(new RangeDecoratorConfig(
                             0,0,64
                     ))
-                            .spreadHorizontally().repeat(1)
+                            .spreadHorizontally().repeat(10)
             ) ;
 
-    private static ConfiguredFeature<?,?> ORE_IRON_DENSE_OVERWORLD = Feature.ORE
-            .configure(
-                    new OreFeatureConfig(
-                            new BlockMatchRuleTest(Blocks.IRON_ORE),
-                            //  OreFeatureConfig.Rules.BASE_STONE_OVERWORLD,
-                            ITAMBlocks.IRON_ORE_DENSE.getDefaultState(),
-                            4//vein Size
-                    ))
-            .decorate(Decorator.RANGE.configure(new RangeDecoratorConfig(
-                            0,0,64
-                    ))
-                            .spreadHorizontally().repeat(5)
-            ) ;
+
 
 
     public static void InitializeOreGen() {
@@ -56,10 +44,5 @@ public class ITAMOreGen {
         BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, ore_iron_node_overworld);
 
 
-        RegistryKey<ConfiguredFeature<?,?>> iron_ore_dense_overworld = RegistryKey.of(Registry.CONFIGURED_FEATURE_WORLDGEN,
-                new Identifier(ITAMMod.MODID,"iron_ore_dense_overworld")
-        );
-        Registry.register(BuiltinRegistries.CONFIGURED_FEATURE,iron_ore_dense_overworld.getValue(),ORE_IRON_DENSE_OVERWORLD);
-        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, iron_ore_dense_overworld);
     }
 }
