@@ -25,6 +25,9 @@
   "entrypoints": {
     "main": [
       "com.darkscarlet.itam.ITAMMod"
+    ],
+    "client": [
+      "com.darkscarlet.itam.client.ITAMClientMod"
     ]
   },
   "mixins": [
