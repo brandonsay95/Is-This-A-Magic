@@ -1,4 +1,7 @@
 {
   "item.itam.iron_ore_node": "Iron Ore Node",
-  "block.itam.iron_ore_node": "Iron Ore Node"
+  "block.itam.iron_ore_node": "Iron Ore Node",
+
+  "item.itam.iron_ore_dense": "Iron Ore Dense",
+  "block.itam.iron_ore_dense": "Iron Ore Dense"
 }
