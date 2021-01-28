@@ -1,0 +1,5 @@
+{
+	"variants": {
+		"": { "model": "itam:block/node_tapper_block" }
+	}
+}

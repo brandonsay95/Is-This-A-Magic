@@ -15,7 +15,7 @@ public class ITAMBlocks{
 
     public static final Block IRON_ORE_NODE = new Block(FabricBlockSettings.of(Material.METAL).hardness(4.0f));
     public static final Block IRON_ORE_DENSE = new Block(FabricBlockSettings.of(Material.METAL).hardness(4.0f));
-    public static final Block NODE_TAPPER_BLOCK = new NodeTabberBlock(FabricBlockSettings.of(Material.METAL).hardness(4.0f));
+    public static final Block NODE_TAPPER_BLOCK = new NodeTapperBlock(FabricBlockSettings.of(Material.METAL).hardness(4.0f));
     public static void InitializeBlocks(){
 
         Registry.register(Registry.BLOCK,new Identifier(ITAMMod.MODID,"iron_ore_node"),IRON_ORE_NODE);

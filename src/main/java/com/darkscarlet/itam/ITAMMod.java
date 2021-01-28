@@ -18,21 +18,33 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 public class ITAMMod implements ModInitializer {
-    public static final Map<Block, ItemStack> TAPPER_ITEMS = new HashMap<Block,ItemStack>(){
 
+    public static final ArrayList<TapperEntry> TAPPER_ENTRIES = new ArrayList<TapperEntry>();
 
-    };
     public static final String MODID="itam";
     public static final ScreenHandlerType<BoxScreenHandler> BOX_SCREEN_HANDLER;
     static{
         BOX_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(ITAMMod.MODID,"node_tapper_block"), BoxScreenHandler::new);
 
-        TAPPER_ITEMS.put(Blocks.IRON_ORE,new ItemStack(Items.IRON_INGOT,1));
-        TAPPER_ITEMS.put(Blocks.GOLD_ORE,new ItemStack(Items.GOLD_INGOT,1));
-        TAPPER_ITEMS.put(Blocks.COAL_ORE,new ItemStack(Items.COAL,1));
-        TAPPER_ITEMS.put(Blocks.DIAMOND_ORE,new ItemStack(Items.DIAMOND,1));
-        TAPPER_ITEMS.put(Blocks.EMERALD_ORE,new ItemStack(Items.EMERALD,1));
-        TAPPER_ITEMS.put(Blocks.STONE,new ItemStack(Items.STONE,1));
+
+        TAPPER_ENTRIES.add(
+                new TapperEntry().Input(Blocks.DIRT).Output(new ItemStack(Items.DIRT,1)).Cost(1).Ticks(20) );
+
+        TAPPER_ENTRIES.add(
+                new TapperEntry().Input(Blocks.SAND).Output(new ItemStack(Items.SAND,1)).Cost(2).Ticks(40) );
+
+        TAPPER_ENTRIES.add(
+                new TapperEntry().Input(Blocks.GRAVEL).Output(new ItemStack(Items.GRAVEL,1)).Cost(2).Ticks(40) );
+
+        TAPPER_ENTRIES.add(
+                new TapperEntry().Input(Blocks.STONE).Output(new ItemStack(Items.COBBLESTONE,1)).Cost(1).Ticks(40) );
+
+        TAPPER_ENTRIES.add(
+                new TapperEntry().Input(Blocks.COAL_ORE).Output(new ItemStack(Items.IRON_NUGGET,1)).Cost(2).Ticks(80) );
+
+        TAPPER_ENTRIES.add(
+                new TapperEntry().Input(Blocks.IRON_ORE).Output(new ItemStack(Items.IRON_NUGGET,1)).Cost(4).Ticks(80) );
+
     }
 
     @Override

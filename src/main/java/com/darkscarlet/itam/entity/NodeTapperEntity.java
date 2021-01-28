@@ -1,7 +1,9 @@
 package com.darkscarlet.itam.entity;
 
 import com.darkscarlet.itam.ITAMMod;
+import com.darkscarlet.itam.TapperEntry;
 import com.darkscarlet.itam.block.ITAMBlocks;
+import com.darkscarlet.itam.block.NodeTapperBlock;
 import com.darkscarlet.itam.item.ITAMItem;
 import com.darkscarlet.itam.screenhandlers.BoxScreenHandler;
 import net.minecraft.block.Block;
@@ -32,6 +34,8 @@ import java.util.Map;
 
 public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandlerFactory ,  ImplementedInventory, Tickable {
 
+    private  int speed = 1;
+    private  double efficiency = 1;
     private int _currentTick = 0 ;
     private int _maxTick = 20;
     private boolean canStack = true;
@@ -45,18 +49,30 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
 
     private final DefaultedList<ItemStack> items = DefaultedList.ofSize(9, ItemStack.EMPTY);
 
+    public NodeTapperEntity(int speed, double efficiency) {
+        super(ITAMEntity.NODE_TAPPER_ENTITY);
+        this.speed = speed;
+        this.efficiency=efficiency;
+
+    }
+
     @Override
     public void fromTag(BlockState state, CompoundTag tag) {
         super.fromTag(state, tag);
         Inventories.fromTag(tag,items);
+
+        this.speed = tag.getInt("speed");
+        this.efficiency = tag.getDouble("efficiency");
+
     }
 
     @Override
     public CompoundTag toTag(CompoundTag tag) {
         Inventories.toTag(tag,items);
+        tag.putInt("speed",this.speed);
+        tag.putDouble("efficiency",this.efficiency);
         return super.toTag(tag);
     }
-
     public NodeTapperEntity(){
         super(ITAMEntity.NODE_TAPPER_ENTITY);
     }
@@ -76,23 +92,49 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
     public ScreenHandler createMenu(int syncId, PlayerInventory inv, PlayerEntity player) {
        return new BoxScreenHandler(syncId,inv,this);
     }
-
+    int _cTick2 =0;
     @Override
     public void tick() {
 
         if(this.world != null && !this.world.isClient ){
-            if(canUse()){
-            _currentTick = 0;
+            //if(canUse()){
 
-            ArrayList<ItemStack> blockCounts = calculateBLockMap(1);
+            //_cTick2 += _currentTick;
+                // block works in units of 20 ticks
+                //anything lower is not calculated
+                //anything higher needs to wait another cycle.
+                // Im so sorry :-(
+
+            //_currentTick = 0;
+            _cTick2+=1; // tick iterator
+            ArrayList<tapperStruct> blockCounts = calculateBlockMap(1);
+            int blockCountCost = 0;
+            int tickTime = 0;
+
+            for(tapperStruct stack :blockCounts){
+                blockCountCost += stack.tapperEntry.CostPerCycle * stack.multiplier;
+                tickTime += stack.tapperEntry.TicksPerCycle ;//* stack.multiplier;
+            }
+            tickTime /= this.speed;
+            blockCountCost /=this.efficiency;
+            if(tickTime <=0)
+                tickTime = 1;
+            if(_cTick2 <tickTime)
+                return;
+            _cTick2 -=tickTime;
+
             int manaPool = getManaPool();
             int deduct = 0;
-            if(manaPool >= blockCounts.size())
+
+            if(manaPool >= blockCountCost)
             {
-                for(ItemStack itemStack : blockCounts){
-                    boolean canAdd = addSlot(itemStack);
+                for(tapperStruct stack : blockCounts){
+                    ItemStack stk = stack.tapperEntry.OutputPerCycle.copy();
+                    stk.setCount(stk.getCount() * stack.multiplier);
+
+                    boolean canAdd = addSlot(stk.copy());
                     if(canAdd)
-                        deduct ++;
+                        deduct += (stack.tapperEntry.CostPerCycle * stack.multiplier)/ this.efficiency;
 
                 }
                 if(deduct >0){
@@ -109,7 +151,7 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
 
             }
 
-        }
+       // }
     }
 
     private boolean addSlot(ItemStack itemStack) {
@@ -138,10 +180,20 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
     private int deductManaPool(int deduct){
         //int mxSize = 0;
         for(int i = 0 ; i < size();i++){
+
+            if(deduct<=0)
+                return 0 ;
+
             Item itm = getStack(i).getItem();
             if(itm == ITAMItem.Anima_Essence){
-               getStack(i).setCount(getStack(i).getCount() - deduct); // im not doing any negative protection here
-                return deduct;
+                if(getStack(i).getCount() - deduct<0){
+                    deduct -= getStack(i).getCount();
+                    getStack(i).setCount(0);
+                }else{
+                    getStack(i).setCount(getStack(i).getCount() - deduct); // im not doing any negative protection here
+                    return 0;
+                }
+               // return deduct;
                 //im so very lazy
             }
         }
@@ -149,21 +201,36 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
         return 0;
     }
     private int getManaPool() { // im so fucking lazy // were just not going to allow them to use more than one slot , unless they are good at math
-        //int mxSize = 0;
+        int mxSize = 0;
         for(int i = 0 ; i < size();i++){
             Item itm = getStack(i).getItem();
             if(itm == ITAMItem.Anima_Essence){
-                return getStack(i).getCount();
-                //mxSize += getStack(i).getCount();
+                //return getStack(i).getCount();
+                mxSize += getStack(i).getCount();
             }
         }
-       // return mxSize;
-        return 0;
+        return mxSize;
+       // return 0;
     }
+    private class tapperStruct{
+        public TapperEntry tapperEntry;
+        public int multiplier = 0;
+        public tapperStruct Entry(TapperEntry entry)
+        {
+            this.tapperEntry = entry;
+            return this;
+        }
 
-    private ArrayList<ItemStack> calculateBLockMap(int radius) {
+        public tapperStruct Multiplier(int m)
+        {
+            this.multiplier = m;
+            return this;
+        }
+    }
+    private ArrayList<tapperStruct> calculateBlockMap(int radius) {
         /// possibly only needs calculated when blocks around me are changed
-        Map<Block,Integer> mp = new HashMap<Block,Integer>();
+        ArrayList<tapperStruct> lst = new ArrayList<tapperStruct>();
+
         int xpos = pos.getX();
         int ypos = pos.getY();
         int zpos = pos.getZ();
@@ -171,18 +238,17 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
             for(int y = ypos-radius; y<= ypos+radius ; y++)
                 for(int z = zpos-radius; z<= zpos+radius ; z++){
                     Block block = world.getBlockState(new BlockPos(x,y,z)).getBlock();
-                    if(ITAMMod.TAPPER_ITEMS.containsKey(block)){
-                        ItemStack s = ITAMMod.TAPPER_ITEMS.get(block);
-                        int cnt = mp.containsKey(block)?mp.get(block) +1:1;
-                        mp.put(block,cnt);
+                    if(ITAMMod.TAPPER_ENTRIES.stream().anyMatch(n->n.Key == block)){
+                        TapperEntry s = ITAMMod.TAPPER_ENTRIES.stream().filter(n->n.Key == block).findFirst().orElse(null);
+                        if(lst.stream().anyMatch(n->n.tapperEntry == s)){
+                            tapperStruct str =  lst.stream().filter(n->n.tapperEntry == s).findFirst().orElse(null);
+                            str.multiplier++;
+                        }else{
+                            lst.add(new tapperStruct().Entry(s).Multiplier(1));
+                        }
                     }
                 }
-        ArrayList<ItemStack> lst = new ArrayList<ItemStack>();
-        for(Block key: mp.keySet()){
-            ItemStack stack = ITAMMod.TAPPER_ITEMS.get(key).copy();
-            stack.setCount(stack.getCount() * mp.get(key));
-            lst.add(stack);
-        }
+
         return lst;
 
     }

@@ -12,12 +12,23 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class NodeTabberBlock extends BlockWithEntity {
-    public NodeTabberBlock(Settings settings) {
+public class NodeTapperBlock extends BlockWithEntity {
+    private  int speed = 1;
+    private  double efficiency  = 1;
+
+    public NodeTapperBlock(Settings settings, int speed, double efficiency) {
+        super(settings);
+        this.speed = speed;
+        this.efficiency=efficiency;
+        
+    }
+    public NodeTapperBlock(Settings settings) {
         super(settings);
     }
 
@@ -25,12 +36,16 @@ public class NodeTabberBlock extends BlockWithEntity {
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockView world) {
-        return new NodeTapperEntity(); // the entity to be spawned when the block is placed
+        return new NodeTapperEntity();//(speed,efficiency); // the entity to be spawned when the block is placed
     }
     @Override
     public BlockRenderType getRenderType(BlockState state) {
         //With inheriting from BlockWithEntity this defaults to INVISIBLE, so we need to change that!
         return BlockRenderType.MODEL;
+    }
+    @Override
+    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
+        return VoxelShapes.cuboid(0.0001f, 0.0001f, 0.0001f, 1f, 1f, 1f);
     }
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
