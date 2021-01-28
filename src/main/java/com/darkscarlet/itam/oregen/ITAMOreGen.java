@@ -19,29 +19,29 @@ import net.minecraft.world.gen.feature.OreFeatureConfig;
 
 public class ITAMOreGen {
 
-    private static ConfiguredFeature<?,?> ORE_IRON_NODE_OVERWORLD = Feature.ORE
+    private static ConfiguredFeature<?,?> ORE_ANIMA_OVERWORLD = Feature.ORE
             .configure(
                     new OreFeatureConfig(
-                            new BlockMatchRuleTest(Blocks.IRON_ORE),
-                           // OreFeatureConfig.Rules.BASE_STONE_OVERWORLD,
-                            ITAMBlocks.IRON_ORE_NODE.getDefaultState(),
+                            //new BlockMatchRuleTest(Blocks.IRON_ORE),
+                           OreFeatureConfig.Rules.BASE_STONE_OVERWORLD,
+                            ITAMBlocks.ANIMA_ORE.getDefaultState(),
                             10//vein Size
                     ))
             .decorate(Decorator.RANGE.configure(new RangeDecoratorConfig(
                             0,0,64
                     ))
-                            .spreadHorizontally().repeat(10)
+                            .spreadHorizontally().repeat(20)
             ) ;
 
 
 
 
     public static void InitializeOreGen() {
-        RegistryKey<ConfiguredFeature<?,?>> ore_iron_node_overworld = RegistryKey.of(Registry.CONFIGURED_FEATURE_WORLDGEN,
-                new Identifier(ITAMMod.MODID,"ore_iron_node_overworld")
+        RegistryKey<ConfiguredFeature<?,?>> ore_anima_overworld = RegistryKey.of(Registry.CONFIGURED_FEATURE_WORLDGEN,
+                new Identifier(ITAMMod.MODID,"ore_anima_overworld")
         );
-        Registry.register(BuiltinRegistries.CONFIGURED_FEATURE,ore_iron_node_overworld.getValue(),ORE_IRON_NODE_OVERWORLD);
-        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, ore_iron_node_overworld);
+        Registry.register(BuiltinRegistries.CONFIGURED_FEATURE,ore_anima_overworld.getValue(),ORE_ANIMA_OVERWORLD);
+        BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, ore_anima_overworld);
 
 
     }

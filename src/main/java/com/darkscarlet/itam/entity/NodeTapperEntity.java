@@ -43,6 +43,9 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
 
     private long lastTickTimer;
 
+    private int lastTickTime;
+    private int lastBlockCost;
+
     public NodeTapperEntity(BlockEntityType<?> type) {
         super(type);
     }
@@ -84,7 +87,7 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
 
     @Override
     public Text getDisplayName() {
-        return new TranslatableText(getCachedState().getBlock().getTranslationKey());
+        return new TranslatableText("E:" + this.efficiency + "|S:" + this.speed + "TC:" + this.lastTickTime + "LC:" +this.lastBlockCost);
     }
 
     @Nullable
@@ -112,11 +115,18 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
             int tickTime = 0;
 
             for(tapperStruct stack :blockCounts){
-                blockCountCost += stack.tapperEntry.CostPerCycle * stack.multiplier;
+                blockCountCost += stack.tapperEntry.CostPerCycle;// * stack.multiplier;
                 tickTime += stack.tapperEntry.TicksPerCycle ;//* stack.multiplier;
             }
+
+            calcSpeedAndEfficiency();
+            this.lastTickTime = tickTime;
+            this.lastBlockCost = blockCountCost;
+
             tickTime /= this.speed;
             blockCountCost /=this.efficiency;
+
+
             if(tickTime <=0)
                 tickTime = 1;
             if(_cTick2 <tickTime)
@@ -134,7 +144,10 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
 
                     boolean canAdd = addSlot(stk.copy());
                     if(canAdd)
-                        deduct += (stack.tapperEntry.CostPerCycle * stack.multiplier)/ this.efficiency;
+                        deduct += (stack.tapperEntry.CostPerCycle
+                                //* stack.multiplier
+
+                        )/ this.efficiency;
 
                 }
                 if(deduct >0){
@@ -153,6 +166,20 @@ public class NodeTapperEntity  extends BlockEntity implements NamedScreenHandler
 
        // }
     }
+
+    private void calcSpeedAndEfficiency() {
+        int spd = 1;
+        int eff = 1;
+        for(int i = 0 ; i < size();i++) {
+            if(! getStack(i).isEmpty() && getStack(i).getItem() == ITAMItem.ANIMA_SPEED_UP)
+                spd++;
+            if(! getStack(i).isEmpty() && getStack(i).getItem() == ITAMItem.ANIMA_EFFICIENCY_UP)
+                eff++;
+        }
+        this.speed = spd;
+        this.efficiency = eff;
+
+   }
 
     private boolean addSlot(ItemStack itemStack) {
         for(int i = 0 ; i < size();i++){

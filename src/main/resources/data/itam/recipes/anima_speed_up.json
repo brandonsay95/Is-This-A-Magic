@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "WWW",
+    "   ",
+    "WWW"
+  ],
+  "key": {
+    "W": {
+      "item": "itam:anima_essence"
+    }
+  },
+  "result": {
+    "item": "itam:anima_speed_up",
+    "count": 1
+  }
+}
